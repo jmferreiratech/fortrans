@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<html ng-app="gistApi">
+<head>
+    <title>Horários da Linha</title>
+    <link href="Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <script src="Scripts/angular.min.js" type="text/javascript"></script>
+    <script src="Scripts/angular-ui/ui-bootstrap.min.js" type="text/javascript"></script>
+    <script src="Scripts/angular-ui/ui-bootstrap-tpls.min.js" type="text/javascript"></script>
+    <script src="Scripts/i18n/angular-locale_pt-br.js" type="text/javascript"></script>
+    <script src="Scripts/utilitarios/utilitarios.js" type="text/javascript"></script>
+    <script src="Controllers/linHorariosCtrl.js" type="text/javascript"></script>
+</head>
+<body>
+    <div class='container-fluid' ng-controller="linHorariosCtrl">
+        <h1>
+            Horários da Linha
+        </h1>
+        <alert ng-show="loadingLinhas">
+            <img src="Content/Images/ajax-loader2.gif"/>{{loadingLinhas}}
+        </alert>
+        <alert ng-show="erro">
+            {{erro}}
+        </alert>
+        <form name="consulta_linha" ng-submit="consultar(selected)" ng-show="!loadingLinhas">
+            <input id="search" type="text" ng-model="selected" ng-required="true" typeahead="linha for linha in linhas | filter:$viewValue"
+                   class="form-control" typeahead-min-length="1">
+            <h4>
+                Data
+            </h4>
+            <div class="row">
+                <div class="col-md-2">
+                    <p class="input-group">
+                        <input type="text" class="form-control" datepicker-popup="{{format}}" ng-model="dt"
+                               is-open="opened" min-date="minDate" max-date="'2015-06-22'" datepicker-options="dateOptions"
+                               ng-required="true" ng-locale="pt-BR" current-text="Hoje" clear-text="Limpar"
+                               close-text="Fechar" />
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="open($event)">
+                                <i class="glyphicon glyphicon-calendar"></i>
+                            </button>
+                        </span>
+                    </p>
+                </div>
+            </div>
+            <br />
+            <button class="btn">
+                Consultar
+            </button>
+        </form>
+        <hr />
+
+        <img ng-show="loadingHorarios" src="Content/Images/ajax-loader2.gif" />
+
+        <div ng-show="!erro">
+            <div ng-show="!loadingHorarios">
+                <div ng-show="linhaConsultada">
+                    <h3>
+                        Linha {{linhaConsultada}}
+                    </h3>
+                    <h3>
+                        Dia {{dataSelecionada}}
+                    </h3>
+                    <h3 ng-show="linhaConsultada">
+                        Horários de Saídas:
+                    </h3>
+                    <h5><img src="Content/Images/acessivel.ico" /> - Veículo Acessível</h5>
+                </div>
+                <div ng-repeat="listaHorarios in horariosPontos">
+                    <div style="clear: both">
+                        <hr />
+                        <button class="btn btn-primary" ng-click="isCollapsed = !isCollapsed">
+                            {{listaHorarios.postoControle.trim()}} <span class="glyphicon glyphicon-chevron-down">
+                            </span>
+                        </button>
+                    </div>
+                    <div collapse="isCollapsed" ng-repeat="item in listaHorarios.horarios" style="float: left">
+                        <br />
+                        <div class="well well-sm">
+                            <span style="width: 100">
+                                {{item.horario}}
+                                <img ng-show="item.acessivel == 'sim'" src="Content/Images/acessivel.gif" title="Veículo Acessível" />
+                                <img ng-show="item.acessivel == 'nao'" src="Content/Images/nacessivel2.gif" title="Veículo Não é Acessível" />
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        
+        <br />
+    </div>
+</body>
