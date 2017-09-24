@@ -21,7 +21,7 @@
 
         $scope.loadingLinhas = " Carregando linhas, aguarde...";
 
-        $http.get("http://gistapis.etufor.ce.gov.br:8081/api/linhas/")
+        $http.get("https://etufor-proxy.herokuapp.com/api/linhas/")
         .then(onLinhasCompleted);
 
         //---------------------------------------------------------------
@@ -62,7 +62,7 @@
 
             $scope.loadingHorarios = true;
 
-            $http.get("http://gistapis.etufor.ce.gov.br:8081/api/horarios/" + numeroLinha + '?data=' + data)
+            $http.get("https://etufor-proxy.herokuapp.com/api/horarios/" + numeroLinha + '?data=' + data)
             .then(onHorariosComplete, onHorariosError);
 
             $scope.linhaConsultada = linha;
