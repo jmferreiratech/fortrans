@@ -1,0 +1,18 @@
+{
+  "name": "Fortrans",
+  "version": "0.0.0",
+  "description": "Horários do transporte público de Fortaleza/CE",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jmarcelof/hoc-pwa"
+  },
+  "author": "Marcelo Ferreira",
+  "license": "MIT",
+  "dependencies": {
+    "serve": "^1.4.0"
+  }
+}
