@@ -1,4 +1,4 @@
-const version = 6;
+const version = 13;
 const currentCacheName = 'v' + version;
 
 const files = [
@@ -43,15 +43,52 @@ self.addEventListener('activate', function (event) {
 });
 
 self.addEventListener('fetch', function (event) {
-    event.respondWith(caches.match(event.request).then(function (response) {
+    event.respondWith(lazyFetch(event.request));
+    prefetchNextDays(event.request);
+});
+
+function prefetchNextDays(request) {
+    const url = new URL(request.url);
+    if (!url.search.startsWith('?data='))
+        return;
+    dates().reduce(function (acc, dt) {
+            return acc.then(function () {
+                return lazyFetch(url.origin + url.pathname + '?data=' + dateToQueryValue(dt));
+            });
+        },
+        Promise.resolve());
+}
+
+function lazyFetch(request) {
+    return caches.match(request).then(function (response) {
         if (response !== undefined)
             return response;
-        return fetch(event.request).then(function (response) {
+        return fetch(request).then(function (response) {
             var responseClone = response.clone();
             caches.open(currentCacheName).then(function (cache) {
-                cache.put(event.request, responseClone);
+                cache.put(request, responseClone);
             });
             return response;
         });
-    }));
-});
+    });
+}
+
+function dateToQueryValue(dt) {
+    return dt.getFullYear() + pad(dt.getMonth() + 1, 2) + pad(dt.getDate(), 2);
+
+    function pad(n, width, z) {
+        z = z || '0';
+        n = n + '';
+        return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+    }
+}
+
+function dates() {
+    const result = [];
+    for (var i = 0; i < 10; i++) {
+        const dt = new Date();
+        dt.setDate(dt.getDate() + i);
+        result.push(dt);
+    }
+    return result;
+}
