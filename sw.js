@@ -1,4 +1,4 @@
-const version = 13;
+const version = 15;
 const currentCacheName = 'v' + version;
 
 const files = [
