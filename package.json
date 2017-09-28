@@ -2,17 +2,32 @@
   "name": "Fortrans",
   "version": "0.0.0",
   "description": "Horários do transporte público de Fortaleza/CE",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "toolbox": "react-toolbox-themr",
+    "eject": "react-scripts eject"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jmarcelof/fortrans"
+    "url": "https://github.com/jmarcelof/fortrans.git"
   },
   "author": "Marcelo Ferreira",
   "license": "MIT",
+  "homepage": "https://jmarcelof.github.io/fortrans",
   "dependencies": {
-    "serve": "^1.4.0"
+    "material-design-icons": "^3.0.1",
+    "react": "^15.6.2",
+    "react-dom": "^15.4.0",
+    "react-scripts": "1.0.14",
+    "react-toolbox": "^2.0.0-beta.8",
+    "react-toolbox-themr": "^1.0.2"
+  },
+  "reactToolbox": {
+    "output": "src/resources/toolbox"
   }
 }
