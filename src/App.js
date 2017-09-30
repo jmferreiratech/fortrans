@@ -8,6 +8,7 @@ import Avatar from "react-toolbox/lib/avatar/Avatar";
 import Tabs from "react-toolbox/lib/tabs/Tabs";
 import Tab from "react-toolbox/lib/tabs/Tab";
 import BusLineRepository from "./persistence/BusLineRepository";
+import BusScheduleRepository from "./persistence/BusScheduleRepository";
 
 const accessible = require("./resources/images/acessivel.gif");
 const nAccessible = require("./resources/images/nacessivel2.gif");
@@ -64,8 +65,7 @@ class App extends Component {
         }
         const numeroLinha = linha.substring(0, 3);
         const data = dt.getFullYear() + pad(dt.getMonth() + 1, 2) + pad(dt.getDate(), 2);
-        fetch("https://etufor-proxy.herokuapp.com/api/horarios/" + numeroLinha + '?data=' + data)
-            .then(response => response.json())
+        new BusScheduleRepository().get(numeroLinha, data)
             .then(horariosPontos => {
                 this.setState(() => ({
                     loadingHorarios: false,
