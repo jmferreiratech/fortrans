@@ -9,6 +9,14 @@ class BusScheduleService {
             .reduce((acc, dt) => acc.then(() => BusScheduleRepository().get(lineNumber, dateToQueryValue(dt))),
             Promise.resolve());
     }
+
+    deleteOldDays() {
+        const today = parseInt(dateToQueryValue(new Date()), 10);
+        return BusScheduleRepository().all()
+            .then(schedules => schedules.filter(schedule => parseInt(schedule.date, 10) < today))
+            .then(schedules => schedules.map(schedule => schedule.id))
+            .then(schedulesIds => BusScheduleRepository().delete(schedulesIds));
+    }
 }
 
 function dates(numberOfDays) {
