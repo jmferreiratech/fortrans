@@ -7,6 +7,7 @@ import DatePicker from "react-toolbox/lib/date_picker/DatePicker";
 import Avatar from "react-toolbox/lib/avatar/Avatar";
 import Tabs from "react-toolbox/lib/tabs/Tabs";
 import Tab from "react-toolbox/lib/tabs/Tab";
+import BusLineRepository from "./persistence/BusLineRepository";
 
 const accessible = require("./resources/images/acessivel.gif");
 const nAccessible = require("./resources/images/nacessivel2.gif");
@@ -33,12 +34,11 @@ class App extends Component {
     }
 
     componentDidMount() {
-        fetch("https://etufor-proxy.herokuapp.com/api/linhas/")
-            .then(response => response.json())
-            .then(data => {
+        new BusLineRepository().all()
+            .then(lines => {
                 this.setState(() => ({
                     loadingLinhas: '',
-                    linhas: data.map(item => ({value: item.numeroNome, label: item.numeroNome})),
+                    linhas: lines.map(item => ({value: item.numeroNome, label: item.numeroNome})),
                 }));
             });
     }

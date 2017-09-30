@@ -20,6 +20,7 @@
   "license": "MIT",
   "homepage": "https://jmarcelof.github.io/fortrans",
   "dependencies": {
+    "dexie": "^2.0.0",
     "material-design-icons": "^3.0.1",
     "react": "^15.6.2",
     "react-dom": "^15.4.0",
