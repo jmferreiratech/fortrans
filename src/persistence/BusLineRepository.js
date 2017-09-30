@@ -16,4 +16,4 @@ class BusLineRepository {
     }
 }
 
-export default BusLineRepository;
+export default () => new BusLineRepository();

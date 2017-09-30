@@ -7,8 +7,10 @@ import DatePicker from "react-toolbox/lib/date_picker/DatePicker";
 import Avatar from "react-toolbox/lib/avatar/Avatar";
 import Tabs from "react-toolbox/lib/tabs/Tabs";
 import Tab from "react-toolbox/lib/tabs/Tab";
+
 import BusLineRepository from "./persistence/BusLineRepository";
 import BusScheduleRepository from "./persistence/BusScheduleRepository";
+import BusScheduleService from "./services/BusScheduleService";
 
 const accessible = require("./resources/images/acessivel.gif");
 const nAccessible = require("./resources/images/nacessivel2.gif");
@@ -35,7 +37,7 @@ class App extends Component {
     }
 
     componentDidMount() {
-        new BusLineRepository().all()
+        BusLineRepository().all()
             .then(lines => {
                 this.setState(() => ({
                     loadingLinhas: '',
@@ -65,7 +67,7 @@ class App extends Component {
         }
         const numeroLinha = linha.substring(0, 3);
         const data = dt.getFullYear() + pad(dt.getMonth() + 1, 2) + pad(dt.getDate(), 2);
-        new BusScheduleRepository().get(numeroLinha, data)
+        BusScheduleRepository().get(numeroLinha, data)
             .then(horariosPontos => {
                 this.setState(() => ({
                     loadingHorarios: false,
@@ -77,6 +79,9 @@ class App extends Component {
                     loadingHorarios: false,
                     erro: "Não há horários para essa linha nesse dia.",
                 }));
+            })
+            .then(() => {
+                BusScheduleService().prefetchNextDays(numeroLinha);
             });
     }
 

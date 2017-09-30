@@ -16,4 +16,4 @@ class BusScheduleRepository {
     }
 }
 
-export default BusScheduleRepository;
+export default () => new BusScheduleRepository();
