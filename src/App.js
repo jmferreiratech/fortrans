@@ -11,6 +11,7 @@ import Tab from "react-toolbox/lib/tabs/Tab";
 import BusLineRepository from "./persistence/BusLineRepository";
 import BusScheduleRepository from "./persistence/BusScheduleRepository";
 import BusScheduleService from "./services/BusScheduleService";
+import DatesUtils from "./utils/DatesUtils";
 
 const accessible = require("./resources/images/acessivel.gif");
 const nAccessible = require("./resources/images/nacessivel2.gif");
@@ -63,12 +64,11 @@ class App extends Component {
                 selected: "",
                 loadingHorarios: true,
                 linhaConsultada: linha,
-                dataSelecionada: pad(dt.getDate(), 2) + '/' + pad(dt.getMonth() + 1, 2) + '/' + dt.getFullYear(),
+                dataSelecionada: DatesUtils().toDisplay(dt),
             }));
         }
         const numeroLinha = linha.substring(0, 3);
-        const data = dt.getFullYear() + pad(dt.getMonth() + 1, 2) + pad(dt.getDate(), 2);
-        BusScheduleRepository().get(numeroLinha, data)
+        BusScheduleRepository().get(numeroLinha, dt)
             .then(horariosPontos => {
                 this.setState(() => ({
                     loadingHorarios: false,
@@ -142,10 +142,7 @@ class App extends Component {
                     {!loadingHorarios && <div>
                         {linhaConsultada && <div>
                             <h3>
-                                Linha {linhaConsultada}
-                            </h3>
-                            <h3>
-                                Dia {dataSelecionada}
+                                Linha {linhaConsultada} - {dataSelecionada}
                             </h3>
                             <h3>
                                 Horários de Saídas:
@@ -177,12 +174,6 @@ class App extends Component {
             </div>
         );
     }
-}
-
-function pad(n, width, z) {
-    z = z || '0';
-    n = n + '';
-    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
 
 export default App;
