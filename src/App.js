@@ -9,7 +9,6 @@ import Tabs from "react-toolbox/lib/tabs/Tabs";
 import Tab from "react-toolbox/lib/tabs/Tab";
 
 import BusLineRepository from "./persistence/BusLineRepository";
-import BusScheduleRepository from "./persistence/BusScheduleRepository";
 import BusScheduleService from "./services/BusScheduleService";
 import DatesUtils from "./utils/DatesUtils";
 
@@ -44,8 +43,8 @@ class App extends Component {
                     loadingLinhas: '',
                     linhas: lines.map(item => ({value: item.numeroNome, label: item.numeroNome})),
                 }));
-            });
-        BusScheduleService().deleteOldDays();
+            })
+            .then(() => BusScheduleService().deleteOldDays());
     }
 
     handleSubmit(event) {
@@ -68,7 +67,7 @@ class App extends Component {
             }));
         }
         const numeroLinha = linha.substring(0, 3);
-        BusScheduleRepository().get(numeroLinha, dt)
+        BusScheduleService().get(numeroLinha, dt)
             .then(horariosPontos => {
                 this.setState(() => ({
                     loadingHorarios: false,
@@ -81,9 +80,8 @@ class App extends Component {
                     erro: "Não há horários para essa linha nesse dia.",
                 }));
             })
-            .then(() => {
-                BusScheduleService().prefetchNextDays(numeroLinha);
-            });
+            .then(() => BusScheduleService().deleteOldLines())
+            .then(() => BusScheduleService().prefetchNextDays(numeroLinha));
     }
 
     handleChangeLine(linha) {

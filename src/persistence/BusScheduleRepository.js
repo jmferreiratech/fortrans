@@ -17,6 +17,12 @@ class BusScheduleRepository {
             });
     }
 
+    byLineNumber(lineNumber) {
+        return db.schedules
+            .where({lineNumber: lineNumber.toString().padStart(3, "0")})
+            .toArray();
+    }
+
     all() {
         return db.schedules
             .toArray();
