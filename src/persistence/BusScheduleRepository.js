@@ -19,7 +19,7 @@ class BusScheduleRepository {
 
     byLineNumber(lineNumber) {
         return db.schedules
-            .where({lineNumber: lineNumber.toString().padStart(3, "0")})
+            .where({lineNumber})
             .toArray();
     }
 

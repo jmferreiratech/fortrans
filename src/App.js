@@ -41,7 +41,7 @@ class App extends Component {
             .then(lines => {
                 this.setState(() => ({
                     loadingLinhas: '',
-                    linhas: lines.map(item => ({value: item.numeroNome, label: item.numeroNome})),
+                    linhas: lines.map(item => ({value: item.numero, label: item.numeroNome})),
                 }));
             })
             .then(() => BusScheduleService().deleteOldDays());
@@ -49,25 +49,16 @@ class App extends Component {
 
     handleSubmit(event) {
         event.preventDefault();
-        const {dt, linha} = this.state;
+        const {dt, linha, linhas} = this.state;
 
-        if (!linha || linha.indexOf("-") < 1) {
-            this.setState(() => ({
-                erro: "Linha não identificada, digite o nome corretamente e selecione a linha.",
-                selected: "",
-            }));
-            return false;
-        } else {
-            this.setState(() => ({
-                erro: "",
-                selected: "",
-                loadingHorarios: true,
-                linhaConsultada: linha,
-                dataSelecionada: DatesUtils().toDisplay(dt),
-            }));
-        }
-        const numeroLinha = linha.substring(0, 3);
-        BusScheduleService().get(numeroLinha, dt)
+        this.setState(() => ({
+            erro: "",
+            selected: "",
+            loadingHorarios: true,
+            linhaConsultada: linhas.find(line => line.value === linha).label,
+            dataSelecionada: DatesUtils().toDisplay(dt),
+        }));
+        BusScheduleService().get(linha, dt)
             .then(horariosPontos => {
                 this.setState(() => ({
                     loadingHorarios: false,
@@ -81,7 +72,7 @@ class App extends Component {
                 }));
             })
             .then(() => BusScheduleService().deleteOldLines())
-            .then(() => BusScheduleService().prefetchNextDays(numeroLinha));
+            .then(() => BusScheduleService().prefetchNextDays(linha));
     }
 
     handleChangeLine(linha) {
