@@ -8,7 +8,7 @@ const numberOfLinesToKeep = 10;
 class BusScheduleService {
 
     get(lineNumber, dt) {
-        updateLastAccess(lineNumber);
+        updateAccessMetrics(lineNumber);
         return BusScheduleRepository().get(lineNumber, dt);
     }
 
@@ -40,9 +40,11 @@ class BusScheduleService {
     }
 }
 
-function updateLastAccess(lineNumber) {
+function updateAccessMetrics(lineNumber) {
     return BusLineRepository().byLineNumber(lineNumber)
-        .then(line => BusLineRepository().update({...line, lastAccess: new Date()}));
+        .then(line => ({...line, lastAccess: new Date()}))
+        .then(line => ({...line, accessCount: line.accessCount + 1}))
+        .then(line => BusLineRepository().update(line));
 }
 
 export default () => new BusScheduleService();
