@@ -44,7 +44,8 @@ class App extends Component {
                     linhas: lines.map(item => ({value: item.numero, label: item.numeroNome})),
                 }));
             })
-            .then(() => BusScheduleService().deleteOldDays());
+            .then(() => BusScheduleService().deleteOldDays())
+            .then(() => BusScheduleService().prefetchTopLines());
     }
 
     handleSubmit(event) {

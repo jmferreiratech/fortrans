@@ -4,6 +4,7 @@ import DatesUtils from "../utils/DatesUtils";
 
 const numberOfDaysToPrefetch = 10;
 const numberOfLinesToKeep = 10;
+const numberOfTopLines = 5;
 
 class BusScheduleService {
 
@@ -18,6 +19,14 @@ class BusScheduleService {
                 Promise.resolve());
     }
 
+    prefetchTopLines() {
+        return persistedLines()
+            .then(lines => lines.sort((a, b) => b.accessCount - a.accessCount))
+            .then(lines => lines.filter(line => lines.indexOf(line) < numberOfTopLines))
+            .then(lines => lines.map(line => line.numero))
+            .then(lineNumbers => lineNumbers.reduce((acc, lineNumber) => acc.then(() => this.prefetchNextDays(lineNumber)), Promise.resolve()));
+    }
+
     deleteOldDays() {
         const today = new Date();
         return BusScheduleRepository().all()
@@ -27,10 +36,7 @@ class BusScheduleService {
     }
 
     deleteOldLines() {
-        return BusScheduleRepository().all()
-            .then(schedules => schedules.map(schedule => schedule.lineNumber))
-            .then(lineNumbers => lineNumbers.filter((lineNumber, i) => i === lineNumbers.indexOf(lineNumber)))
-            .then(lineNumbers => Promise.all(lineNumbers.map(lineNumber => BusLineRepository().byLineNumber(lineNumber))))
+        return persistedLines()
             .then(lines => lines.sort((a, b) => a.lastAccess < b.lastAccess))
             .then(lines => lines.filter(line => lines.indexOf(line) > numberOfLinesToKeep))
             .then(lines => Promise.all(lines.map(line => BusScheduleRepository().byLineNumber(line.numero))))
@@ -45,6 +51,13 @@ function updateAccessMetrics(lineNumber) {
         .then(line => ({...line, lastAccess: new Date()}))
         .then(line => ({...line, accessCount: line.accessCount + 1}))
         .then(line => BusLineRepository().update(line));
+}
+
+function persistedLines() {
+    return BusScheduleRepository().all()
+        .then(schedules => schedules.map(schedule => schedule.lineNumber))
+        .then(lineNumbers => lineNumbers.filter((lineNumber, i) => i === lineNumbers.indexOf(lineNumber)))
+        .then(lineNumbers => Promise.all(lineNumbers.map(lineNumber => BusLineRepository().byLineNumber(lineNumber))));
 }
 
 export default () => new BusScheduleService();
