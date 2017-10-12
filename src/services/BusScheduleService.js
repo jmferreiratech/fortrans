@@ -15,8 +15,7 @@ class BusScheduleService {
 
     prefetchNextDays(lineNumber, numberOfDays = numberOfDaysToPrefetch) {
         return DatesUtils().array(numberOfDays)
-            .reduce((acc, dt) => acc.then(() => BusScheduleRepository().get(lineNumber, dt)),
-                Promise.resolve());
+            .reduce((acc, dt) => acc.then(() => BusScheduleRepository().get(lineNumber, dt)).catch(e => console.log(e.message)), Promise.resolve());
     }
 
     prefetchTopLines() {

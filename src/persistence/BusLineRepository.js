@@ -1,4 +1,5 @@
 import db from "./Database";
+import HttpService from "../services/HttpService";
 
 class BusLineRepository {
 
@@ -9,12 +10,7 @@ class BusLineRepository {
             .then(lines => {
                 if (lines.length)
                     return lines;
-                return fetch("https://etufor-proxy.herokuapp.com/api/linhas/")
-                    .then(response => {
-                        if (!response.ok)
-                            throw new Error(response.statusText);
-                        return response.json();
-                    })
+                return HttpService().getJSON("https://etufor-proxy.herokuapp.com/api/linhas/")
                     .then(lines => lines.map(line => ({...line, lastAccess: new Date()})))
                     .then(lines => db.lines.bulkAdd(lines))
                     .then(() => this.all());

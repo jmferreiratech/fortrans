@@ -1,5 +1,6 @@
 import db from "./Database";
 import DatesUtils from "../utils/DatesUtils";
+import HttpService from "../services/HttpService";
 
 class BusScheduleRepository {
 
@@ -8,10 +9,13 @@ class BusScheduleRepository {
         return db.schedules
             .where({lineNumber, date})
             .first()
-            .then(result => result.tables) // get tables on client code, not here
-            .catch(() => {
-                return fetch(`https://etufor-proxy.herokuapp.com/api/horarios/${lineNumber}?data=${DatesUtils().toQuery(date)}`)
-                    .then(response => response.json())
+            .then(result => {
+                if (!result)
+                    throw new Error(`No data to line ${lineNumber} at ${dt}`);
+                return result.tables; // get tables on client code, not here
+            })
+            .catch(e => {
+                return HttpService().getJSON(`https://etufor-proxy.herokuapp.com/api/horarios/${lineNumber}?data=${DatesUtils().toQuery(date)}`)
                     .then(schedule => db.schedules.add({lineNumber, date, tables: schedule}))
                     .then(() => this.get(lineNumber, date));
             });
