@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import Dropdown from "react-toolbox/lib/dropdown/Dropdown";
+import Autocomplete from "react-toolbox/lib/autocomplete/Autocomplete";
 import Snackbar from "react-toolbox/lib/snackbar/Snackbar";
 import Button from "react-toolbox/lib/button/Button";
 import Chip from "react-toolbox/lib/chip/Chip";
@@ -23,7 +23,7 @@ class App extends Component {
         super();
         this.state = {
             loadingLinhas: " Carregando linhas, aguarde...",
-            linhas: [],
+            linhas: {},
             linha: '',
             erro: '',
             horariosPontos: [],
@@ -41,7 +41,7 @@ class App extends Component {
             .then(lines => {
                 this.setState(() => ({
                     loadingLinhas: '',
-                    linhas: lines.map(item => ({value: item.numero, label: item.numeroNome})),
+                    linhas: lines.reduce((acc, line) => ({...acc, [line.numero]: line.numeroNome}), {}),
                 }));
             })
             .then(() => BusScheduleService().deleteOldDays())
@@ -51,12 +51,11 @@ class App extends Component {
     handleSubmit(event) {
         event.preventDefault();
         const {dt, linha, linhas} = this.state;
-
         this.setState(() => ({
             erro: "",
             selected: "",
             loadingHorarios: true,
-            linhaConsultada: linhas.find(line => line.value === linha).label,
+            linhaConsultada: linhas[linha],
             dataSelecionada: DatesUtils().toDisplay(dt),
         }));
         BusScheduleService().get(linha, dt)
@@ -112,12 +111,13 @@ class App extends Component {
                 />}
 
                 {!loadingLinhas && <form name="consulta_linha" onSubmit={this.handleSubmit}>
-                    <Dropdown
-                        label="Linha"
-                        auto
+                    <Autocomplete
+                        label="Escolha a linha"
                         onChange={this.handleChangeLine}
                         source={linhas}
                         value={linha}
+                        multiple={false}
+                        suggestionMatch="anywhere"
                     />
                     <DatePicker label='Data da consulta' sundayFirstDayOfWeek value={dt}
                                 onChange={this.handleChangeDate}/>
