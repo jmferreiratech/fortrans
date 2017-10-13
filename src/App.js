@@ -12,7 +12,7 @@ import BusLineRepository from "./persistence/BusLineRepository";
 import BusScheduleService from "./services/BusScheduleService";
 import DatesUtils from "./utils/DatesUtils";
 
-const accessible = require("./resources/images/acessivel.gif");
+const accessible = require("./resources/images/accessibility-80.jpg");
 const nAccessible = require("./resources/images/nacessivel2.gif");
 const accessibleIcon = require("./resources/images/acessivel.ico");
 const loader = require("./resources/images/ajax-loader2.gif");
