@@ -23,6 +23,10 @@ class DatesUtils {
         return moment(dt1).diff(dt2, 'days');
     }
 
+    compare(dt1, dt2) {
+        return moment(dt1).diff(dt2);
+    }
+
     array(length, from = new Date()) {
         const result = [];
         for (let i = 0; i < length; i++) {

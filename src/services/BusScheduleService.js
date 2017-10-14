@@ -36,7 +36,7 @@ class BusScheduleService {
 
     deleteOldLines() {
         return persistedLines()
-            .then(lines => lines.sort((a, b) => a.lastAccess < b.lastAccess))
+            .then(lines => lines.sort((a, b) => -DatesUtils().compare(a.lastAccess, b.lastAccess)))
             .then(lines => lines.filter(line => lines.indexOf(line) > numberOfLinesToKeep))
             .then(lines => Promise.all(lines.map(line => BusScheduleRepository().byLineNumber(line.numero))))
             .then(schedules => schedules.reduce((acc, schedule) => acc.concat(...schedule), []))
