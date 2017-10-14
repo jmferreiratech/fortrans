@@ -22,9 +22,9 @@ class App extends Component {
     constructor() {
         super();
         this.state = {
-            loadingLinhas: " Carregando linhas, aguarde...",
-            linhas: {},
-            linha: '',
+            loadingLinhas: "Carregando linhas, aguarde...",
+            lines: {},
+            selectedLine: '',
             erro: '',
             horariosPontos: [],
             dt: new Date(),
@@ -38,10 +38,11 @@ class App extends Component {
 
     componentDidMount() {
         BusLineRepository().all()
+            .then(lines => lines.sort((a, b) => -DatesUtils().compare(a.lastAccess, b.lastAccess)))
             .then(lines => {
                 this.setState(() => ({
                     loadingLinhas: '',
-                    linhas: lines.reduce((acc, line) => ({...acc, [line.numero]: line.numeroNome}), {}),
+                    lines
                 }));
             })
             .then(() => BusScheduleService().deleteOldDays())
@@ -50,15 +51,16 @@ class App extends Component {
 
     handleSubmit(event) {
         event.preventDefault();
-        const {dt, linha, linhas} = this.state;
+        const {dt, selectedLine, lines} = this.state;
+        const lineNumber = lines.find(line => line.numeroNome === selectedLine).numero;
         this.setState(() => ({
             erro: "",
             selected: "",
             loadingHorarios: true,
-            linhaConsultada: linhas[linha],
+            linhaConsultada: selectedLine,
             dataSelecionada: DatesUtils().toDisplay(dt),
         }));
-        BusScheduleService().get(linha, dt)
+        BusScheduleService().get(lineNumber, dt)
             .then(horariosPontos => {
                 this.setState(() => ({
                     loadingHorarios: false,
@@ -72,11 +74,11 @@ class App extends Component {
                 }));
             })
             .then(() => BusScheduleService().deleteOldLines())
-            .then(() => BusScheduleService().prefetchNextDays(linha));
+            .then(() => BusScheduleService().prefetchNextDays(lineNumber));
     }
 
-    handleChangeLine(linha) {
-        this.setState({linha});
+    handleChangeLine(selectedLine) {
+        this.setState({selectedLine});
     }
 
     handleChangeDate(dt) {
@@ -88,7 +90,7 @@ class App extends Component {
     }
 
     render() {
-        const {loadingLinhas, erro, horariosPontos, linhaConsultada, dataSelecionada, loadingHorarios, linhas, linha, dt, tabIndex} = this.state;
+        const {loadingLinhas, erro, horariosPontos, linhaConsultada, dataSelecionada, loadingHorarios, lines, selectedLine, dt, tabIndex} = this.state;
 
         return (
             <div className='container-fluid'>
@@ -114,10 +116,11 @@ class App extends Component {
                     <Autocomplete
                         label="Escolha a linha"
                         onChange={this.handleChangeLine}
-                        source={linhas}
-                        value={linha}
+                        source={lines.map(line => line.numeroNome)}
+                        value={selectedLine}
                         multiple={false}
                         suggestionMatch="anywhere"
+                        showSuggestionsWhenValueIsSet={true}
                     />
                     <DatePicker label='Data da consulta' sundayFirstDayOfWeek value={dt}
                                 onChange={this.handleChangeDate}/>
