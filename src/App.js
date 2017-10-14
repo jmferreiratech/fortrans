@@ -147,15 +147,7 @@ class App extends Component {
                                 <Tab key={listaHorarios.postoControle} label={listaHorarios.postoControle.trim()}>
                                     <section>
                                     {listaHorarios.horarios.map(item => (
-                                        <Chip key={item.horario}>
-                                            <Avatar>
-                                                {item.acessivel === 'sim' &&
-                                                <img src={accessible} title="Veículo Acessível"/>}
-                                                {item.acessivel === 'nao' && <img src={nAccessible}
-                                                                                  title="Veículo Não é Acessível"/>}
-                                            </Avatar>
-                                            <span>{item.horario}</span>
-                                        </Chip>
+                                        <Schedule key={item.horario} item={item}/>
                                     ))}
                                     </section>
                                 </Tab>
@@ -167,6 +159,22 @@ class App extends Component {
             </div>
         );
     }
+}
+
+function Schedule(props) {
+    const isAccessible = props.item.acessivel === 'sim';
+    return (
+        <Chip>
+            <Avatar>
+                {isAccessible ?
+                    <img src={accessible} title="Veículo Acessível"/> :
+                    <img src={nAccessible} title="Veículo Não é Acessível"/>}
+            </Avatar>
+            {DatesUtils().hourString() > props.item.horario ?
+                <span style={{textDecoration: 'line-through'}}>{props.item.horario}</span> :
+                <strong>{props.item.horario}</strong>}
+        </Chip>
+    );
 }
 
 export default App;

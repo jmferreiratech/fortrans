@@ -5,6 +5,10 @@ moment.locale("pt-br");
 
 class DatesUtils {
 
+    hourString(dt = new Date()) {
+        return moment(dt).format("HH:mm");
+    }
+
     toDisplay(dt) {
         return moment(dt).format("ddd, D [de] MMM [de] YYYY");
     }
