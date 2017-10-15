@@ -103,6 +103,9 @@ class App extends Component {
             selectedDate,
             selectedTabIndex} = this.state;
 
+        const minDate = new Date();
+        minDate.setDate(minDate.getDate() - 2);
+
         return (
             <div className='container-fluid'>
                 <h1>
@@ -135,6 +138,9 @@ class App extends Component {
                     />
                     <DatePicker label='Data da consulta'
                                 sundayFirstDayOfWeek
+                                locale="pt"
+                                cancelLabel="Cancelar"
+                                minDate={minDate}
                                 value={selectedDate}
                                 onChange={this.handleChangeDate}
                     />
