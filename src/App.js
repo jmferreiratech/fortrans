@@ -14,7 +14,6 @@ import DatesUtils from "./utils/DatesUtils";
 
 const accessible = require("./resources/images/accessibility-80.jpg");
 const nAccessible = require("./resources/images/nacessivel2.gif");
-const accessibleIcon = require("./resources/images/acessivel.ico");
 const loader = require("./resources/images/ajax-loader2.gif");
 
 class App extends Component {
@@ -22,13 +21,16 @@ class App extends Component {
     constructor() {
         super();
         this.state = {
-            loadingLinhas: "Carregando linhas, aguarde...",
-            lines: {},
-            selectedLine: '',
-            erro: '',
-            horariosPontos: [],
-            dt: new Date(),
-            tabIndex: 0,
+            loadingLines: "Carregando linhas, aguarde...",
+            loadingSchedules: false,
+            error: "",
+            lines: [],
+            selectedLine: "",
+            selectedDate: new Date(),
+            selectedTabIndex: 0,
+            loadedLine: "",
+            loadedDate: new Date(),
+            loadedSchedules: [],
         };
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChangeLine = this.handleChangeLine.bind(this);
@@ -41,7 +43,7 @@ class App extends Component {
             .then(lines => lines.sort((a, b) => -DatesUtils().compare(a.lastAccess, b.lastAccess)))
             .then(lines => {
                 this.setState(() => ({
-                    loadingLinhas: '',
+                    loadingLines: "",
                     lines
                 }));
             })
@@ -51,26 +53,25 @@ class App extends Component {
 
     handleSubmit(event) {
         event.preventDefault();
-        const {dt, selectedLine, lines} = this.state;
-        const lineNumber = lines.find(line => line.numeroNome === selectedLine).numero;
         this.setState(() => ({
-            erro: "",
-            selected: "",
-            loadingHorarios: true,
-            linhaConsultada: selectedLine,
-            dataSelecionada: DatesUtils().toDisplay(dt),
+            error: "",
+            loadingSchedules: true,
         }));
-        BusScheduleService().get(lineNumber, dt)
-            .then(horariosPontos => {
+        const {selectedDate, selectedLine, lines} = this.state;
+        const lineNumber = lines.find(line => line.numeroNome === selectedLine).numero;
+        BusScheduleService().get(lineNumber, selectedDate)
+            .then(loadedSchedules => {
                 this.setState(() => ({
-                    loadingHorarios: false,
-                    horariosPontos,
+                    loadingSchedules: false,
+                    loadedSchedules,
+                    loadedLine: selectedLine,
+                    loadedDate: selectedDate,
                 }));
             })
             .catch(() => {
                 this.setState(() => ({
-                    loadingHorarios: false,
-                    erro: "Não há horários para essa linha nesse dia.",
+                    loadingSchedules: false,
+                    error: "Não há horários para essa linha nesse dia.",
                 }));
             })
             .then(() => BusScheduleService().deleteOldLines())
@@ -81,38 +82,48 @@ class App extends Component {
         this.setState({selectedLine});
     }
 
-    handleChangeDate(dt) {
-        this.setState({dt});
+    handleChangeDate(selectedDate) {
+        this.setState({selectedDate});
     }
 
-    handleChangeTab(tabIndex) {
-        this.setState({tabIndex});
+    handleChangeTab(selectedTabIndex) {
+        this.setState({selectedTabIndex});
     }
 
     render() {
-        const {loadingLinhas, erro, horariosPontos, linhaConsultada, dataSelecionada, loadingHorarios, lines, selectedLine, dt, tabIndex} = this.state;
+        const {
+            loadingLines,
+            error,
+            loadedSchedules,
+            loadedLine,
+            loadedDate,
+            loadingSchedules,
+            lines,
+            selectedLine,
+            selectedDate,
+            selectedTabIndex} = this.state;
 
         return (
             <div className='container-fluid'>
                 <h1>
                     Horários da Linha
                 </h1>
-                {loadingLinhas && <Snackbar
+                {loadingLines && <Snackbar
                     action='Ok'
-                    label={loadingLinhas}
-                    active={!!loadingLinhas}
+                    label={loadingLines}
+                    active={!!loadingLines}
                     ref='snackbar'
                     type='accept'
                 />}
-                {erro && <Snackbar
+                {error && <Snackbar
                     action='Ok'
-                    label={erro}
-                    active={!!erro}
+                    label={error}
+                    active={!!error}
                     ref='snackbar'
                     type='warning'
                 />}
 
-                {!loadingLinhas && <form name="consulta_linha" onSubmit={this.handleSubmit}>
+                {lines.length > 0 && <form name="consulta_linha" onSubmit={this.handleSubmit}>
                     <Autocomplete
                         label="Escolha a linha"
                         onChange={this.handleChangeLine}
@@ -122,38 +133,38 @@ class App extends Component {
                         suggestionMatch="anywhere"
                         showSuggestionsWhenValueIsSet={true}
                     />
-                    <DatePicker label='Data da consulta' sundayFirstDayOfWeek value={dt}
-                                onChange={this.handleChangeDate}/>
+                    <DatePicker label='Data da consulta'
+                                sundayFirstDayOfWeek
+                                value={selectedDate}
+                                onChange={this.handleChangeDate}
+                    />
                     <br/>
                     <Button label='Consultar' raised primary onClick={this.handleSubmit}/>
                 </form>}
                 <hr/>
 
-                {loadingHorarios && <img src={loader}/>}
+                {loadingSchedules && <img src={loader} alt=""/>}
 
-                {!erro && <div>
-                    {!loadingHorarios && <div>
-                        {linhaConsultada && <div>
-                            <h3>
-                                Linha {linhaConsultada} - {dataSelecionada}
-                            </h3>
-                            <h3>
-                                Horários de Saídas:
-                            </h3>
-                            <h5><img src={accessibleIcon}/> - Veículo Acessível</h5>
-                        </div>}
-                        <Tabs inverse fixed onChange={this.handleChangeTab} index={tabIndex}>
-                            {horariosPontos.map(listaHorarios => (
-                                <Tab key={listaHorarios.postoControle} label={listaHorarios.postoControle.trim()}>
-                                    <section>
-                                    {listaHorarios.horarios.map(item => (
-                                        <Schedule key={item.horario} item={item}/>
-                                    ))}
-                                    </section>
-                                </Tab>
-                            ))}
-                        </Tabs>
+                {!error && !loadingSchedules && <div>
+                    {loadedLine && <div>
+                        <h3>
+                            Linha {loadedLine} - {DatesUtils().toDisplay(loadedDate)}
+                        </h3>
+                        <h3>
+                            Horários de Saídas:
+                        </h3>
                     </div>}
+                    <Tabs inverse fixed onChange={this.handleChangeTab} index={selectedTabIndex}>
+                        {loadedSchedules.map(listaHorarios => (
+                            <Tab key={listaHorarios.postoControle} label={listaHorarios.postoControle.trim()}>
+                                <section>
+                                {listaHorarios.horarios.map(item => (
+                                    <Schedule key={item.horario} item={item}/>
+                                ))}
+                                </section>
+                            </Tab>
+                        ))}
+                    </Tabs>
                 </div>}
                 <br/>
             </div>
@@ -167,8 +178,8 @@ function Schedule(props) {
         <Chip>
             <Avatar>
                 {isAccessible ?
-                    <img src={accessible} title="Veículo Acessível"/> :
-                    <img src={nAccessible} title="Veículo Não é Acessível"/>}
+                    <img src={accessible} title="Veículo Acessível" alt=""/> :
+                    <img src={nAccessible} title="Veículo Não é Acessível" alt=""/>}
             </Avatar>
             {DatesUtils().hourString() > props.item.horario ?
                 <span style={{textDecoration: 'line-through'}}>{props.item.horario}</span> :
